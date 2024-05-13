@@ -16,7 +16,7 @@ export type UserImportJobPayload = {
 } & BaseJobPayload
 
 export class UserImportJob extends AbstractEnqueuedJobProcessor<UserImportJobPayload> {
-  public static QUEUE_ID = 'UserImportJob'
+  public static readonly QUEUE_ID = 'UserImportJob'
   private readonly userService: UserService
 
   constructor(dependencies: Dependencies) {

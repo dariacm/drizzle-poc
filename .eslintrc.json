@@ -16,13 +16,7 @@
     "plugin:vitest/recommended"
   ],
   "rules": {
-    "n/file-extension-in-import": [
-      "error",
-      "always",
-      {
-        ".js": "always"
-      }
-    ],
+    "n/file-extension-in-import": "off",
     "@typescript-eslint/no-empty-interface": "warn",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-use-before-define": "off",

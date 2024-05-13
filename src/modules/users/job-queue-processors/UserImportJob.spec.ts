@@ -17,7 +17,7 @@ describe('UserImportJob', () => {
       },
     )
     await cleanRedis(testContext.diContainer.cradle.redis)
-    await cleanTables(testContext.diContainer.cradle.prisma, [DB_MODEL.User])
+    await cleanTables(testContext.diContainer.cradle.drizzle, [DB_MODEL.Users])
     userImportJob = testContext.diContainer.cradle.userImportJob
   })
 
@@ -43,7 +43,7 @@ describe('UserImportJob', () => {
       'completed',
     )
 
-    const users = await testContext.diContainer.cradle.prisma.user.findMany()
+    const users = await testContext.diContainer.cradle.drizzle.query.users.findMany()
     expect(users).toHaveLength(1)
     expect(users[0]).toMatchObject(userData)
 

@@ -1,6 +1,6 @@
-import type { User } from '@prisma/client'
 import type { Loader } from 'layered-loader'
 
+import type { User } from '../../../db/schema/users'
 import { EntityNotFoundError } from '../../../infrastructure/errors/publicErrors.js'
 import type { UsersInjectableDependencies } from '../diConfig.js'
 import type { UserRepository } from '../repositories/UserRepository.js'
@@ -29,6 +29,7 @@ export class UserService {
       age: user.age ?? null,
       email: user.email,
     })
+
     await this.userLoader.invalidateCacheFor(newUser.id.toString())
     return newUser
   }
@@ -55,9 +56,7 @@ export class UserService {
   }
 
   async getUsers(userIds: string[]): Promise<UserDTO[]> {
-    const users = await this.userRepository.getUsers(userIds)
-
-    return users
+    return await this.userRepository.getUsers(userIds)
   }
 
   async findUserById(id: string): Promise<UserDTO | null> {

@@ -1,5 +1,3 @@
-import { beforeEach, expect } from 'vitest'
-
 import { cleanTables, DB_MODEL } from '../../../../test/DbCleaner.js'
 import { getTestConfigurationOverrides } from '../../../../test/jwtUtils.js'
 import type { AppInstance } from '../../../app.js'
@@ -17,7 +15,7 @@ describe('UserController', () => {
     app = await getApp(getTestConfigurationOverrides())
   })
   beforeEach(async () => {
-    await cleanTables(app.diContainer.cradle.prisma, [DB_MODEL.User])
+    await cleanTables(app.diContainer.cradle.drizzle, [DB_MODEL.Users])
   })
   afterAll(async () => {
     await app.close()

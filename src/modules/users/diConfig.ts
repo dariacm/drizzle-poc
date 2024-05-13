@@ -1,9 +1,9 @@
-import type { User } from '@prisma/client'
 import type { Resolver } from 'awilix'
 import { asClass, asFunction, Lifetime } from 'awilix'
 import type { InMemoryCacheConfiguration, LoaderConfig } from 'layered-loader'
 import { Loader, createNotificationPair, RedisCache } from 'layered-loader'
 
+import type { User } from '../../db/schema/users'
 import type { CommonDependencies } from '../../infrastructure/commonDiConfig.js'
 import type { DIOptions } from '../../infrastructure/diConfigUtils.js'
 import { isJobEnabled, isQueueEnabled } from '../../infrastructure/diConfigUtils.js'

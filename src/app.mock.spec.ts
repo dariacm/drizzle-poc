@@ -1,8 +1,8 @@
-import type { User } from '@prisma/client'
 import { asClass } from 'awilix'
 
 import type { AppInstance } from './app.js'
 import { getApp } from './app.js'
+import type { User } from './db/schema/users'
 import type { Dependencies } from './infrastructure/parentDiConfig.js'
 import { SINGLETON_CONFIG } from './infrastructure/parentDiConfig.js'
 import { UserService } from './modules/users/services/UserService.js'
