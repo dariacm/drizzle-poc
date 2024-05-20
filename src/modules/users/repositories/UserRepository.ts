@@ -1,54 +1,46 @@
-import type { Prisma, PrismaClient, User } from '@prisma/client'
+import { eq } from 'drizzle-orm'
+import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import { inArray } from 'drizzle-orm/sql/expressions/conditions'
 
+import type * as schema from '../../../db/schema/users'
+import { users } from '../../../db/schema/users'
 import type { UsersInjectableDependencies } from '../diConfig.js'
 
+type NewUser = schema.NewUser
+type User = schema.User
+
 export class UserRepository {
-  private readonly prisma: PrismaClient
+  private readonly drizzle: PostgresJsDatabase<typeof schema>
 
-  constructor({ prisma }: UsersInjectableDependencies) {
-    this.prisma = prisma
+  constructor({ drizzle }: UsersInjectableDependencies) {
+    this.drizzle = drizzle
   }
 
-  getUser(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: {
-        id,
-      },
-    })
+  async getUser(id: string): Promise<User | null> {
+    const result = await this.drizzle.query.users.findFirst({ where: eq(users.id, id) })
+    return result ?? null
   }
 
-  deleteUser(id: string): Promise<User | null> {
-    return this.prisma.user.delete({
-      where: {
-        id,
-      },
-    })
+  async deleteUser(id: string): Promise<User | null> {
+    const result = await this.drizzle.delete(users).where(eq(users.id, id)).returning()
+    return result.length === 0 ? null : result[0]
   }
 
-  updateUser(id: string, updatedUser: Prisma.UserUpdateInput): Promise<User | null> {
-    return this.prisma.user.update({
-      data: updatedUser,
-      where: {
-        id,
-      },
-    })
+  async updateUser(id: string, updatedUser: NewUser): Promise<User | null> {
+    const result = await this.drizzle
+      .update(users)
+      .set(updatedUser)
+      .where(eq(users.id, id))
+      .returning()
+    return result ? result[0] : null
   }
 
-  async getUsers(userIds: string[]): Promise<User[]> {
-    const result = await this.prisma.user.findMany({
-      where: {
-        id: {
-          in: userIds,
-        },
-      },
-    })
-    return result
+  getUsers(userIds: string[]): Promise<User[]> {
+    return this.drizzle.select().from(users).where(inArray(users.id, userIds))
   }
 
-  async createUser(user: Prisma.UserCreateInput): Promise<User> {
-    const createdUser = await this.prisma.user.create({
-      data: user,
-    })
-    return createdUser
+  async createUser(user: NewUser): Promise<User> {
+    const createdUser = await this.drizzle.insert(users).values(user).returning()
+    return createdUser[0]
   }
 }

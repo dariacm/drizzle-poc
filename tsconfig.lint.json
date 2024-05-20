@@ -1,5 +1,12 @@
 {
   "extends": ["./tsconfig.json"],
-  "include": ["scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "vitest.config.mts"],
+  "include": [
+    "scripts/**/*.ts",
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "vitest.config.mts",
+    "drizzle.config.ts",
+    "drizzle.test.config.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

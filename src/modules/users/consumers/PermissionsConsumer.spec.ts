@@ -1,14 +1,16 @@
 import type { Cradle } from '@fastify/awilix'
 import { waitAndRetry } from '@message-queue-toolkit/core'
-import type { PrismaClient } from '@prisma/client'
 import type { Channel } from 'amqplib'
 import type { AwilixContainer } from 'awilix'
 import { asClass } from 'awilix'
+import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 
 import { cleanTables, DB_MODEL } from '../../../../test/DbCleaner.js'
 import { FakeConsumerErrorResolver } from '../../../../test/fakes/FakeConsumerErrorResolver.js'
 import type { AppInstance } from '../../../app.js'
 import { getApp } from '../../../app.js'
+import type * as schema from '../../../db/schema/users'
+import { users } from '../../../db/schema/users'
 import { SINGLETON_CONFIG } from '../../../infrastructure/parentDiConfig.js'
 import { buildQueueMessage } from '../../../utils/queueUtils.js'
 import type { PermissionsService } from '../services/PermissionsService.js'
@@ -19,16 +21,16 @@ import type { PERMISSIONS_ADD_MESSAGE_TYPE } from './userConsumerSchemas.js'
 const userIds = ['100', '200', '300']
 const perms: [string, ...string[]] = ['perm1', 'perm2']
 
-async function createUsers(prisma: PrismaClient, userIdsToCreate: string[]) {
-  await prisma.user.createMany({
-    data: userIdsToCreate.map((userId) => {
+async function createUsers(drizzle: PostgresJsDatabase<typeof schema>, userIdsToCreate: string[]) {
+  await drizzle.insert(users).values(
+    userIdsToCreate.map((userId) => {
       return {
         id: userId,
         name: userId.toString(),
         email: `test${userId}@email.lt`,
       }
     }),
-  })
+  )
 }
 
 async function resolvePermissions(permissionsService: PermissionsService, userIds: string[]) {
@@ -66,7 +68,7 @@ describe('PermissionsConsumer', () => {
       channel = await (
         await app.diContainer.cradle.amqpConnectionManager.getConnection()
       ).createChannel()
-      await cleanTables(diContainer.cradle.prisma, [DB_MODEL.User])
+      await cleanTables(diContainer.cradle.drizzle, [DB_MODEL.Users])
       await app.diContainer.cradle.permissionsService.deleteAll()
       consumer = app.diContainer.cradle.permissionConsumer
     })
@@ -77,11 +79,11 @@ describe('PermissionsConsumer', () => {
     })
 
     it('Creates permissions', async () => {
-      const { userService, permissionsService, prisma } = diContainer.cradle
+      const { userService, permissionsService, drizzle } = diContainer.cradle
       const users = await userService.getUsers(userIds)
       expect(users).toHaveLength(0)
 
-      await createUsers(prisma, userIds)
+      await createUsers(drizzle, userIds)
 
       void channel.sendToQueue(
         PermissionConsumer.QUEUE_NAME,
@@ -106,7 +108,7 @@ describe('PermissionsConsumer', () => {
     })
 
     it('Wait for users to be created and then create permissions', async () => {
-      const { userService, permissionsService, prisma } = diContainer.cradle
+      const { userService, permissionsService, drizzle } = diContainer.cradle
       const users = await userService.getUsers(userIds)
       expect(users).toHaveLength(0)
 
@@ -127,7 +129,7 @@ describe('PermissionsConsumer', () => {
       const usersFromDb = await resolvePermissions(permissionsService, userIds)
       expect(usersFromDb).toBeNull()
 
-      await createUsers(prisma, userIds)
+      await createUsers(drizzle, userIds)
       await consumer.handlerSpy.waitForMessageWithId('def', 'consumed')
       const usersPermissions = await resolvePermissions(permissionsService, userIds)
 
@@ -140,13 +142,13 @@ describe('PermissionsConsumer', () => {
     })
 
     it('Not all users exist, no permissions were created', async () => {
-      const { userService, permissionsService, prisma } = diContainer.cradle
+      const { userService, permissionsService, drizzle } = diContainer.cradle
       const users = await userService.getUsers(userIds)
       expect(users).toHaveLength(0)
 
       const partialUsers = [...userIds]
       const missingUser = partialUsers.pop()
-      await createUsers(prisma, partialUsers)
+      await createUsers(drizzle, partialUsers)
 
       channel.sendToQueue(
         PermissionConsumer.QUEUE_NAME,
@@ -165,7 +167,7 @@ describe('PermissionsConsumer', () => {
       const usersFromDb = await resolvePermissions(permissionsService, userIds)
       expect(usersFromDb).toBeNull()
 
-      await createUsers(prisma, [missingUser!])
+      await createUsers(drizzle, [missingUser!])
 
       await consumer.handlerSpy.waitForMessageWithId('abcdef', 'consumed')
       const usersPermissions = await resolvePermissions(permissionsService, userIds)

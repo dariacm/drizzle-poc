@@ -9,12 +9,15 @@ import type {
 } from '@lokalise/node-core'
 import { globalLogger } from '@lokalise/node-core'
 import { AmqpConnectionManager, AmqpConsumerErrorResolver } from '@message-queue-toolkit/amqp'
-import { PrismaClient } from '@prisma/client'
 import type { NameAndRegistrationPair } from 'awilix'
 import { asClass, asFunction, Lifetime } from 'awilix'
+import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import { drizzle } from 'drizzle-orm/postgres-js'
 import Redis from 'ioredis'
+import postgres from 'postgres'
 import { ToadScheduler } from 'toad-scheduler'
 
+import * as schema from '../db/schema/users'
 import { FakeStoreApiClient } from '../integrations/FakeStoreApiClient.js'
 
 import { getAmqpConfig, getConfig } from './config.js'
@@ -123,21 +126,12 @@ export function resolveCommonDiConfig(
         lifetime: Lifetime.SINGLETON,
       },
     ),
-
-    prisma: asFunction(
+    drizzle: asFunction(
       ({ config }: CommonDependencies) => {
-        return new PrismaClient({
-          datasources: {
-            db: {
-              url: config.db.databaseUrl,
-            },
-          },
-        })
+        const pg = postgres(config.db.databaseUrl)
+        return drizzle(pg, { schema, logger: true })
       },
       {
-        dispose: (prisma) => {
-          return prisma.$disconnect()
-        },
         lifetime: Lifetime.SINGLETON,
       },
     ),
@@ -190,7 +184,7 @@ export type CommonDependencies = {
   redis: Redis
   redisPublisher: Redis
   redisConsumer: Redis
-  prisma: PrismaClient
+  drizzle: PostgresJsDatabase<typeof schema>
 
   amqpConnectionManager: AmqpConnectionManager
 

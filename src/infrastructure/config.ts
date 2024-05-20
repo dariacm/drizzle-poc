@@ -1,8 +1,8 @@
 import { ConfigScope, createRangeValidator } from '@lokalise/node-core'
 import type { RedisConfig } from '@lokalise/node-core'
 
-import type { AwsConfig } from './aws/awsConfig.js'
-import { getAwsConfig } from './aws/awsConfig.js'
+import type { AwsConfig } from './aws/awsConfig'
+import { getAwsConfig } from './aws/awsConfig'
 
 const configScope: ConfigScope = new ConfigScope()
 const redisDbValidator = createRangeValidator(0, 15)

@@ -7,6 +7,7 @@ import type {
 } from '@lokalise/fastify-extras'
 import type { Either } from '@lokalise/node-core'
 import { executeSettleAllAndHandleGlobalErrors } from '@lokalise/node-core'
+import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 
 import type { AppInstance } from '../app.js'
@@ -54,9 +55,9 @@ export const redisHealthCheck: HealthChecker = async (app): Promise<Either<Error
   return { result: true }
 }
 export const dbHealthCheck: HealthChecker = async (app): Promise<Either<Error, true>> => {
-  const prisma = app.diContainer.cradle.prisma
+  const drizzle = app.diContainer.cradle.drizzle
   try {
-    const response = await prisma.$queryRaw`SELECT 1`
+    const response = await drizzle.execute(sql`SELECT 1`)
     if (!response) {
       return {
         error: new Error('DB healthcheck got an unexpected response'),

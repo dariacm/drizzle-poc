@@ -165,3 +165,52 @@ You have multiple options to ease your development:
 ## Troubleshooting
 
 - If you are running a service in a monorepo setup, it is launched in the background and you want to always force closing the service before attempting to restart, you can use `npm run free-ports`, which will kill an application running on the predefined port (in an OS-independent way).
+
+## Drizzle
+
+### Generate a migration file
+
+1. Either add a new schema file to `src/db/schema` or edit an existing one
+2. Run
+   ```bash
+   npm run db:generate-migrations
+   ```
+   Use `drizzle-kit generate --name {customName}` to add a custom name to your migration
+
+### Apply migrations
+
+1. Run
+   ```bash
+   npm run db:apply-migrations
+   ```
+
+### Apply test migrations
+
+1. Run
+   ```bash
+   npm run test:migrate
+   ```
+
+### Notes
+
+- Use `.returning()` at the end of your query to return the value when it's not automatically returned
+- Why does `insert()` return a list?
+  - Because depending on how values is passed `values()` it can perform single or bulk insertion
+- What's the difference between `InferSelectModel` and `InferInsertModel`?
+- `findFirst()` returns `undefined` if no matching row is found, whereas [Prisma](https://www.prisma.io/docs/orm/reference/prisma-client-reference#return-type-1) usually returns `null` here
+- What's the purpose of the `meta` directory? Should it be committed?
+  - https://github.com/drizzle-team/drizzle-kit-mirror/issues/196
+- Add `logger: true` to `drizzle` config in `commonDiConfig.ts` to log your queries for testing purposes
+- - Statement breakpoints: https://orm.drizzle.team/kit-docs/conf#sql-breakpoints
+- This might solve the problem we had with Prisma where multiple migrations in a single file where running concurrently and failing, so we needed to split them into two files (e.g. making a nullable field non-nullable)
+- From testing, it seems that if we ever need to write an index manually in the migration file and cannot write it in the schema (for some Drizzle limitations) Drizzle will attempt to generate a new migration and drop the extra index
+
+### ToDo
+
+- Test [drizzle-zod](https://orm.drizzle.team/docs/zod)
+- Test transactions
+- Fix `db:wait` script
+- Test indexes
+- Rollback
+- Check if `migrate` applies all migrations, even already applied ones
+- Is there another automated way to generate migrations besides drizzle-kit?
