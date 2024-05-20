@@ -55,6 +55,7 @@
     "awilix-manager": "^5.2.1",
     "bullmq": "^5.7.8",
     "drizzle-orm": "^0.30.10",
+    "drizzle-zod": "^0.5.1",
     "eslint-plugin-n": "^17.3.1",
     "fastify": "^4.26.2",
     "fastify-custom-healthcheck": "^3.1.0",

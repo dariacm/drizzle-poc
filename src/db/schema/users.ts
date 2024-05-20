@@ -1,8 +1,9 @@
 import { randomUUID } from 'crypto'
 
-import type { InferInsertModel, InferSelectModel } from 'drizzle-orm'
 import { sql } from 'drizzle-orm'
-import { char, index, integer, pgTable, uniqueIndex, varchar } from 'drizzle-orm/pg-core'
+import { char, index, integer, pgTable, varchar } from 'drizzle-orm/pg-core'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import type z from 'zod'
 
 export const users = pgTable(
   'users',
@@ -23,5 +24,8 @@ export const users = pgTable(
   },
 )
 
-export type User = InferSelectModel<typeof users>
-export type NewUser = InferInsertModel<typeof users>
+const insertUserSchema = createInsertSchema(users)
+export type NewUser = z.infer<typeof insertUserSchema>
+
+const selectUserSchema = createSelectSchema(users)
+export type User = z.infer<typeof selectUserSchema>

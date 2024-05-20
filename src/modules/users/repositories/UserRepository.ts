@@ -5,7 +5,6 @@ import { inArray } from 'drizzle-orm/sql/expressions/conditions'
 import type * as schema from '../../../db/schema/users'
 import { users } from '../../../db/schema/users'
 import type { UsersInjectableDependencies } from '../diConfig.js'
-import type { UserUpdateDTO } from '../services/UserService'
 
 type NewUser = schema.NewUser
 type User = schema.User
@@ -27,7 +26,7 @@ export class UserRepository {
     return result.length === 0 ? null : result[0]
   }
 
-  async updateUser(id: string, updatedUser: UserUpdateDTO): Promise<User | null> {
+  async updateUser(id: string, updatedUser: NewUser): Promise<User | null> {
     const result = await this.drizzle
       .update(users)
       .set(updatedUser)
