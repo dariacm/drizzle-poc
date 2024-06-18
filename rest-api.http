@@ -1,0 +1,39 @@
+GET http://0.0.0.0:3000/poc/play/start
+Accept: application/json
+
+###
+
+GET http://0.0.0.0:3000/poc/play/ContentImportedEvent
+Accept: application/json
+
+###
+
+GET http://0.0.0.0:3000/poc/play/TmAppliedEvent
+Accept: application/json
+
+###
+
+GET http://0.0.0.0:3000/poc/play/MtAppliedEvent
+Accept: application/json
+
+<> 2024-06-18T152347.200.txt
+
+###
+
+GET http://0.0.0.0:3000/poc/play/TaskCompletedEvent
+Accept: application/json
+
+<> 2024-06-18T152408.200.txt
+<> 2024-06-18T152351.200.txt
+
+###
+
+GET http://0.0.0.0:3000/poc/play/error
+Accept: application/json
+
+###
+
+GET http://0.0.0.0:3000/poc/play
+Accept: application/json
+
+###
