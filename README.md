@@ -177,6 +177,13 @@ You have multiple options to ease your development:
    ```
    Use `drizzle-kit generate --name {customName}` to add a custom name to your migration
 
+### Generate data migration file
+
+1. Run
+   ```bash
+   drizzle-kit generate --dialect postgresql --schema ./src/db/schema/schemas.ts --out ./src/db/migrations --custom
+   ```
+
 ### Apply migrations
 
 1. Run

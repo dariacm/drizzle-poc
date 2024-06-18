@@ -17,7 +17,8 @@ import Redis from 'ioredis'
 import postgres from 'postgres'
 import { ToadScheduler } from 'toad-scheduler'
 
-import * as schema from '../db/schema/users'
+import type { SCHEMA_TYPE } from '../db/schema'
+import { schema } from '../db/schema'
 import { FakeStoreApiClient } from '../integrations/FakeStoreApiClient.js'
 
 import { getAmqpConfig, getConfig } from './config.js'
@@ -184,7 +185,7 @@ export type CommonDependencies = {
   redis: Redis
   redisPublisher: Redis
   redisConsumer: Redis
-  drizzle: PostgresJsDatabase<typeof schema>
+  drizzle: PostgresJsDatabase<SCHEMA_TYPE>
 
   amqpConnectionManager: AmqpConnectionManager
 

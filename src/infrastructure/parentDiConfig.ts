@@ -5,6 +5,8 @@ import type { AwilixContainer, NameAndRegistrationPair, Resolver } from 'awilix'
 import { Lifetime } from 'awilix'
 
 import type { AppInstance } from '../app.js'
+import type { PocModuleDependencies} from '../modules/poc/diConfig';
+import { resolvePocConfig } from '../modules/poc/diConfig'
 import type { UsersModuleDependencies } from '../modules/users/diConfig.js'
 import { resolveUsersConfig } from '../modules/users/diConfig.js'
 
@@ -20,7 +22,7 @@ export type ExternalDependencies = {
 export const SINGLETON_CONFIG = { lifetime: Lifetime.SINGLETON }
 
 export type DependencyOverrides = Partial<DiConfig>
-export type Dependencies = CommonDependencies & UsersModuleDependencies
+export type Dependencies = CommonDependencies & UsersModuleDependencies & PocModuleDependencies
 type DiConfig = NameAndRegistrationPair<Dependencies>
 
 export function registerDependencies(
@@ -32,6 +34,7 @@ export function registerDependencies(
   const diConfig: DiConfig = {
     ...resolveCommonDiConfig(dependencies, options),
     ...resolveUsersConfig(options),
+    ...resolvePocConfig(options),
   }
   diContainer.register(diConfig)
 
