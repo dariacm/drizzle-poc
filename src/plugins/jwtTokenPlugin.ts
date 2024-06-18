@@ -15,23 +15,25 @@ function plugin(
   pluginOptions: JwtTokenPluginOptions,
   next: (err?: Error) => void,
 ) {
-  fastify.addHook(
-    'onRequest',
-    (req: FastifyRequest, res: FastifyReply, done: HookHandlerDoneFunction) => {
-      if (req.routeOptions.url && pluginOptions.skipList.has(req.routeOptions.url)) {
-        return done()
-      }
 
-      req
-        .jwtVerify()
-        .then(() => {
-          done()
-        })
-        .catch((err) => {
-          done(err)
-        })
-    },
-  )
+
+  // fastify.addHook(
+  //   'onRequest',
+  //   (req: FastifyRequest, res: FastifyReply, done: HookHandlerDoneFunction) => {
+  //     if (req.routeOptions.url && pluginOptions.skipList.has(req.routeOptions.url)) {
+  //       return done()
+  //     }
+  //
+  //     req
+  //       .jwtVerify()
+  //       .then(() => {
+  //         done()
+  //       })
+  //       .catch((err) => {
+  //         done(err)
+  //       })
+  //   },
+  // )
 
   next()
 }

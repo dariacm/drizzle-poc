@@ -1,10 +1,17 @@
 import type http from 'node:http'
 
 import type { CommonLogger } from '@lokalise/node-core'
-import type { RouteOptions } from 'fastify'
+import type { FastifyReply, RouteOptions } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
-import { getUserRoutes } from './users/index.js'
+import { pocRoutes } from './poc'
+import type { API_ERROR_TYPE } from './schemas'
+import { getUserRoutes } from './users'
+
+export interface ApiReply<P extends Record<string, unknown>> extends FastifyReply {
+  send(payload: P | API_ERROR_TYPE): FastifyReply
+  status(statusCode: API_ERROR_TYPE['statusCode']): FastifyReply
+}
 
 export type Routes = Array<
   RouteOptions<
@@ -28,6 +35,9 @@ export function getRoutes(): {
   const { routes: userRoutes } = getUserRoutes()
 
   return {
-    routes: [...userRoutes],
+    routes: [
+      ...userRoutes,
+      ...pocRoutes,
+    ],
   }
 }
