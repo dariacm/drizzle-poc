@@ -12,6 +12,7 @@ export const workflows = pgTable(
       .$defaultFn(() => randomUUID()),
     version: integer('version').notNull(),
     data: json('data').notNull().$type<Record<string, unknown>>(),
+    schema: json('schema').$type<Record<string, unknown>>(),
     createdAt: timestamp('timestamp').default(sql`now()`),
   }
 )

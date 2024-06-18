@@ -15,6 +15,13 @@
       "when": 1718707416394,
       "tag": "0001_optimal_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1718715859776,
+      "tag": "0002_boring_texas_twister",
+      "breakpoints": true
     }
   ]
 }

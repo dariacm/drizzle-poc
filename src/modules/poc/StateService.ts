@@ -16,6 +16,7 @@ export class StateService {
   private readonly workflowScheme: MachineContext
   private readonly resourceIds = [5, 99, 640]
   private readonly schemaId = '95885afd-1505-4181-885a-fd15058181a7'
+  private readonly persistSchemas = false
 
   constructor({ schemaRepository }: PocInjectableDependencies) {
     this.schemaRepository = schemaRepository
@@ -26,28 +27,33 @@ export class StateService {
   public async play(eventId: EVENT_ID): Promise<void> {
     console.log(`Playing event ${eventId}`)
 
-    const workflowsMachine = createMachine(this.workflowScheme)
-
     if (eventId === 'start') {
+      const workflowsMachine = createMachine(this.workflowScheme)
       const actor = createActor(workflowsMachine, {
         snapshot: undefined
       })
       const snapshot = actor.getPersistedSnapshot()
       console.log('Snapshot:', snapshot)
       console.log('JSON string:', JSON.stringify(snapshot, null, 2))
-      await this.schemaRepository.upsertSchema(this.schemaId, snapshot)
+      await this.schemaRepository.upsertSchema(this.schemaId, snapshot, this.workflowScheme)
       return
     }
 
-    const schema = await this.schemaRepository.getSchema(this.schemaId)
-    if (!schema) {
+    const workflow = await this.schemaRepository.getSchema(this.schemaId)
+    if (!workflow) {
       throw new EntityNotFoundError({ message: 'Schema not found. Use `start` event to create a new scheme.' })
     }
 
-    console.log('Snapshot:', schema.data)
+    console.log('Snapshot:', workflow.data)
+    console.log('Schema:', workflow.schema)
+    // @ts-ignore
+    console.log('Schema actions:', workflow.schema?.states?.Idle.on.ContentImportedEvent)
+
+    const schema = this.persistSchemas ? workflow.schema as MachineContext : this.workflowScheme
+    const workflowsMachine = createMachine(schema)
 
     const actor = createActor(workflowsMachine, {
-      snapshot: schema.data as Snapshot<unknown>
+      snapshot: workflow.data as Snapshot<unknown>
     })
 
     actor.subscribe((snapshot) => {
@@ -63,7 +69,7 @@ export class StateService {
     }
 
     const snapshot = actor.getPersistedSnapshot()
-    await this.schemaRepository.upsertSchema(this.schemaId, snapshot)
+    await this.schemaRepository.upsertSchema(this.schemaId, snapshot, schema)
   }
 
   public playThrough(): void {

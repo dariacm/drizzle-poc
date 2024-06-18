@@ -21,14 +21,15 @@ export class SchemaRepository {
     return result ?? null
   }
 
-  async upsertSchema(id: string, data: MachineContext): Promise<void> {
+  async upsertSchema(id: string, data: MachineContext, schema: MachineContext): Promise<void> {
     await this.drizzle.insert(workflows).values({
       id,
       version: 1,
-      data
+      data,
+      schema,
     } satisfies NewWorkflow).onConflictDoUpdate({
       target: [workflows.id],
-      set: { data }
+      set: { data, schema }
     })
   }
 }
